@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Meu Caixa Web</title>
+</head>
+<body>
+    <h1>Adicionar Nova Movimentação</h1>
+    
+    <form action="/adicionar" method="POST">
+        <label>Valor:</label><br>
+        <input type="text" name="valor"><br><br>
+
+        <label>Descrição:</label><br>
+        <input type="text" name="descricao"><br><br>
+
+        <label>Categoria:</label><br>
+        <input type="text" name="categoria"><br><br>
+
+        <label>Tipo (Entrada ou Saida):</label><br>
+        <input type="text" name="tipo"><br><br>
+
+        <label>Data:</label><br>
+        <input type="text" name="data"><br><br>
+
+        <button type="submit">Salvar Movimentação</button>
+    </form>
+</body>
+</html>
