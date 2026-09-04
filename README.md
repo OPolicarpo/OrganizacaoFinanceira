@@ -10,16 +10,18 @@ Além do aprendizado, esse projeto resolve uma dor pessoal: hoje uso uma planilh
 
 ## Funcionalidades atuais
 
-> ⚠️ Projeto em desenvolvimento — hoje funciona apenas via código/terminal, sem interface gráfica.
+> ⚠️ Projeto em desenvolvimento — hoje funciona via terminal, através de um menu interativo, sem interface gráfica ainda.
 
-- **Cadastro**: criação de movimentações financeiras (entradas e saídas) diretamente no código
-- **Cálculo**: soma de entradas, saídas e total investido, com saldo final do caixa
-- **Visualização**: extrato das movimentações registradas, exibido no terminal
+- **Cadastro**: adição de movimentações financeiras (entradas e saídas) pelo menu, informando valor, descrição, categoria, tipo e origem
+- **Data automática**: cada movimentação registra a data do dia automaticamente, sem precisar ser digitada
+- **Cálculo**: saldo geral, total gasto por origem (Pessoal/Trabalho) e total investido
+- **Visualização**: extrato completo das movimentações registradas
+- **Tratamento de erros**: o menu não trava se o usuário digitar uma opção inválida ou um valor não-numérico
 
 ## Tecnologias usadas
 
 - **Python 3**
-- [**rich**](https://github.com/Textualize/rich) — biblioteca usada para formatação colorida no terminal
+- `datetime` (biblioteca nativa do Python) — usada para capturar a data atual automaticamente
 
 ## Arquitetura — as classes
 
@@ -27,34 +29,37 @@ O projeto é modelado em torno de duas classes principais, que representam o dom
 
 ### `Movimentacao`
 
-Representa um único evento financeiro (uma entrada ou uma saída).
+Representa um único evento financeiro (uma entrada ou uma saída), seja pessoal ou de trabalho.
 
 **Atributos**
 
 | Atributo | Tipo | Descrição |
 |---|---|---|
 | `valor` | `float` | quantia da movimentação |
-| `data` | `str` | quando aconteceu |
+| `data` | `str` | capturada automaticamente no momento do cadastro |
 | `descricao` | `str` | texto livre, ex: "IFOOD SEXTA" |
 | `categoria` | `str` | ex: "LAZER", "CONTA FIXA", "INVESTIMENTO" |
-| `tipo` | `str` | `"ENTRADA"` ou `"SAIDA"` — define o efeito no caixa |
+| `tipo` | `str` | `"ENTRADA"` ou `"SAIDA"` — define o efeito no saldo |
+| `origem` | `str` | `"PESSOAL"` ou `"TRABALHO"` — de onde partiu a movimentação |
 
 **Métodos**
 
 | Método | O que faz |
 |---|---|
-| `exibir()` | mostra os dados formatados (data, categoria, descrição, valor) |
+| `exibir()` | mostra os dados formatados (tipo, descrição, categoria, data, valor, origem) |
 
 ### `Caixa`
 
-Representa um caixa (Pessoal ou Trabalho), responsável por guardar e somar as movimentações.
+Representa o caixa único do sistema (chamado "Geral"), responsável por guardar e somar todas as movimentações, sejam pessoais ou de trabalho.
+
+> Nota de arquitetura: inicialmente o projeto tinha dois objetos `Caixa` separados (Pessoal e Trabalho). Essa abordagem foi revista: hoje existe um único saldo real (assim como acontece na prática — o dinheiro é um só), e a origem de cada gasto é apenas uma categorização dentro da `Movimentacao`, usada para gerar totais filtrados.
 
 **Atributos**
 
 | Atributo | Tipo | Descrição |
 |---|---|---|
-| `nome` | `str` | "Pessoal" ou "Trabalho" |
-| `saldo_inicial` | `float` | valor que inicia o caixa no mês |
+| `nome` | `str` | nome do caixa (hoje, sempre "Geral") |
+| `saldo_inicial` | `float` | valor que inicia o caixa |
 | `movimentacoes` | `list` | lista de objetos `Movimentacao` |
 
 **Métodos**
@@ -62,9 +67,11 @@ Representa um caixa (Pessoal ou Trabalho), responsável por guardar e somar as m
 | Método | O que faz |
 |---|---|
 | `adc_movimentacao(mov)` | recebe uma `Movimentacao` e guarda na lista |
-| `calcular_saldo()` | retorna `saldo_inicial` + soma de entradas − soma de saídas |
-| `listar_extrato()` | exibe todas as movimentações registradas nesse caixa |
+| `calcular_saldo()` | retorna `saldo_inicial` + soma de entradas − soma de saídas (saldo real) |
+| `listar_extrato()` | exibe todas as movimentações registradas |
 | `calcular_investimento()` | soma o valor das movimentações com categoria `"INVESTIMENTO"` |
+| `calcular_pessoal()` | soma o valor das movimentações com origem `"PESSOAL"` |
+| `calcular_trabalho()` | soma o valor das movimentações com origem `"TRABALHO"` |
 
 ## Como rodar o projeto
 
@@ -72,23 +79,26 @@ Representa um caixa (Pessoal ou Trabalho), responsável por guardar e somar as m
 # 1. Tenha o Python 3 instalado
 python --version
 
-# 2. Instale a dependência do projeto
-pip install rich
-
-# 3. Rode o arquivo principal
-python models.py
+# 2. Rode o menu interativo
+python main.py
 ```
+
+Ao rodar, um menu aparece no terminal com as opções: adicionar movimentação, ver saldo, ver extrato e sair.
+
+> ⚠️ Os dados existem apenas durante a execução do programa — ao fechar o terminal, tudo é perdido. Persistência ainda não foi implementada (ver "Próximos passos").
 
 ## Próximos passos
 
-- [ ] Criar e testar o segundo `Caixa` ("Trabalho"), validando os dois funcionando lado a lado
-- [ ] Persistir os dados (hoje tudo é perdido ao fechar o terminal — salvar em arquivo ou banco de dados)
+- [x] Testar múltiplas movimentações com origens diferentes, validando os totais calculados
+- [x] Criar menu interativo no terminal (`main.py`) para cadastro sem precisar editar código
+- [x] Automatizar a captura da data
+- [x] Tratar erros de entrada do usuário (opção inválida, valor não-numérico)
+- [ ] Persistir os dados (arquivo ou banco de dados — atualmente em estudo via curso de SQL do Guanabara)
+- [ ] Melhorar o tratamento de erro no cadastro para não perder os dados já digitados quando um campo falha
 - [ ] Criar interface web com Flask, conectando as classes já existentes a rotas e páginas HTML
 - [ ] Criar formulários (Jinja2/HTML) para cadastro de movimentações pela web
-- [ ] Revisar padronização de texto (`.upper()`) em todos os campos comparados pelo sistema
 - [ ] Adicionar testes automatizados para `Movimentacao` e `Caixa`
 
 ---
 
 *Projeto pessoal de estudo, feito para fixar conceitos de Programação Orientada a Objetos em Python.*
-.

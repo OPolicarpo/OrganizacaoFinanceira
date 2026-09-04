@@ -1,19 +1,21 @@
+from datetime import datetime
 class Movimentacao:
-    def __init__(self, valor, descricao, categoria, tipo, data=0):
+    def __init__(self, valor, descricao, categoria, tipo, origem ):
         self.valor = valor
         self.descricao = descricao.upper()
         self.categoria = categoria.upper()
         self.tipo = tipo.upper()
-        self.data = data
+        self.data = datetime.now().strftime("%d/%m")
+        self.origem = origem.upper()
 
     def exibir(self):
-        print(f' Foi feito {self.tipo} do item {self.descricao} na categoria {self.categoria} na data {self.data} no valor de {self.valor:,.2f}')
+        print(f' Foi feito {self.tipo} do item {self.descricao} na categoria {self.categoria} na data {self.data} no valor de {self.valor:,.2f} do caixa {self.origem}')
 
 
 class Caixa:
     # Representa um caixa (pessoal ou trabalho), com nome, saldo inicial 
     # e uma lista de movimentações que será preenchida aos poucos
-    def __init__(self, nome, saldo_inicial):
+    def __init__(self, nome, saldo_inicial=float):
         self.nome = nome
         self.saldo_inicial = saldo_inicial
         self.movimentacoes = []
@@ -44,34 +46,55 @@ class Caixa:
             if mov.categoria == "INVESTIMENTO":
                 investimento += mov.valor
         return investimento
+    
+    def calcular_pessoal(self):
+        #aqui vejo a categoria pessoal
+        pessoal = 0
+        for mov in self.movimentacoes:
+            if mov.origem == "PESSOAL":
+                pessoal += mov.valor
+        return pessoal
+
+    def calcular_trabalho(self):
+        trabalho = 0
+        for mov in self.movimentacoes:
+            if mov.origem == "TRABALHO":
+                trabalho+= mov.valor
+        return trabalho
 
 
-caixa_pessoal = Caixa("Policarpo", 1000)
+"""
+meu_caixa = Caixa("Geral", 1000)
 
-a1 = Movimentacao(valor=120, descricao="Manutenção de celular", categoria="servico", tipo="entrada", data='01/09')
-caixa_pessoal.adc_movimentacao(a1)
 
-a2 = Movimentacao(valor=550, descricao="Aluguel Loja", categoria="Despesa fixa loja", tipo="saida", data="10/09")
-caixa_pessoal.adc_movimentacao(a2)
+a1 = Movimentacao(valor=120, descricao="Manutenção de celular", categoria="servico", tipo="entrada", origem= "Trabalho")
+meu_caixa.adc_movimentacao(a1)
 
-a3 = Movimentacao(valor=300, descricao="compra de tela", categoria="investimento", tipo="saida", data="05/09")
-caixa_pessoal.adc_movimentacao(a3)
+a2 = Movimentacao(valor=550, descricao="Aluguel Loja", categoria="Despesa fixa loja", tipo="saida", origem= "Trabalho")
+meu_caixa.adc_movimentacao(a2)
 
-# aqui estamos testando o caixa trabalho
+a3 = Movimentacao(valor=300, descricao="compra de tela", categoria="investimento", tipo="saida" , origem="pessoal")
+meu_caixa.adc_movimentacao(a3)
 
-caixa_trabalho = Caixa("Trabalho", 1000)
 
-b1 = Movimentacao(valor=280, descricao="Man cell", categoria="servico", tipo="entrada", data="09/09")
-caixa_trabalho.adc_movimentacao(b1)
+b1 = Movimentacao(valor=280, descricao="Man cell", categoria="servico", tipo="entrada", origem="pessoal")
+meu_caixa.adc_movimentacao(b1)
 
-b2 = Movimentacao(valor=200, descricao="conta de luz", categoria="despesa fixa variavel", tipo="saida", data="09/09")
-caixa_trabalho.adc_movimentacao(b2)
+b2 = Movimentacao(valor=200, descricao="conta de luz", categoria="despesa fixa variavel", tipo="saida",origem="Trabalho")
+meu_caixa.adc_movimentacao(b2)
 
-print(caixa_pessoal.calcular_saldo())
+print(meu_caixa.calcular_saldo())
 print()
-print(caixa_pessoal.calcular_investimento())
-caixa_pessoal.listar_extrato()
+print(meu_caixa.calcular_investimento())
+print(meu_caixa.listar_extrato())
 
 print('=-' * 50)
-print(caixa_trabalho.calcular_saldo())
-caixa_trabalho.listar_extrato()
+print(meu_caixa.calcular_saldo())
+meu_caixa.listar_extrato()
+
+print('=-' * 50)
+print(meu_caixa.calcular_pessoal())
+
+print('=-' * 50)
+print(meu_caixa.calcular_trabalho())
+"""
